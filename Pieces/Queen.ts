@@ -3,7 +3,6 @@ import { Piece } from "./Piece";
 import { Square } from "../Square";
 
 export class Queen extends Piece {
-
   constructor(color: "white" | "black", square: Square, board: ChessBoard) {
     super(color, square);
     this.board = board;
@@ -15,79 +14,74 @@ export class Queen extends Piece {
 
   getPossibleMoves(): Square[] {
     const possibleMoves: Square[] = [];
-
     const currentRank = this.square.rank;
-    const currentFile =
-      this.square.file.charCodeAt(0) - "a".charCodeAt(0);
+    const currentFile = this.square.file;
 
     // Explore upper-right diagonal
     for (
       let r = currentRank + 1, f = currentFile + 1;
-      r <= 8 && f <= 7;
-      r++, f++
+      r >= 7 && f <= 7;
+      r--, f++
     ) {
-      const pos = new Square(r, String.fromCharCode(f + "a".charCodeAt(0)), this.board);
-      const piece = this.board.getPieceFromSquare(pos);
+      if (
+        currentFile < 7 &&
+        currentFile >= 0 &&
+        currentRank <= 7 &&
+        currentRank >= 0
+      ) {
+        const pos = new Square(r, f, this.board);
+        const piece = this.board.getPieceFromSquare(pos);
 
-      if (piece) {
-        if (piece.getColor() !== this.color) {
-          possibleMoves.push(pos);
+        if (piece) {
+          if (piece.color !== this.color) {
+            possibleMoves.push(pos);
+          }
+          break;
         }
-        break;
-      }
 
-      possibleMoves.push(pos);
+        possibleMoves.push(pos);
+      }
     }
 
     // Explore lower-right diagonal
     for (
-      let r = currentRank - 1, f = currentFile + 1;
-      r >= 1 && f <= 7;
-      r--, f++
+      let r = currentRank + 1, f = currentFile + 1;
+      r <= 7 && f <= 7;
+      r++, f++
     ) {
-      const pos = new Square(r, String.fromCharCode(f + "a".charCodeAt(0)), this.board);
+      if (
+        currentFile < 7 &&
+        currentFile >= 0 &&
+        currentRank <= 7 &&
+        currentRank >= 0
+      ) {
+      const pos = new Square(r, f, this.board);
       const piece = this.board.getPieceFromSquare(pos);
-
       if (piece) {
-        if (piece.getColor() !== this.color) {
+        if (piece.color !== this.color) {
           possibleMoves.push(pos);
         }
         break;
       }
-
       possibleMoves.push(pos);
     }
-
+  }
     // Explore lower-left diagonal
     for (
-      let r = currentRank - 1, f = currentFile - 1;
-      r >= 1 && f >= 0;
-      r--, f--
-    ) {
-      const pos = new Square(r, String.fromCharCode(f + "a".charCodeAt(0)), this.board);
-      const piece = this.board.getPieceFromSquare(pos);
-
-      if (piece) {
-        if (piece.getColor() !== this.color) {
-          possibleMoves.push(pos);
-        }
-        break;
-      }
-
-      possibleMoves.push(pos);
-    }
-
-    // Explore upper-left diagonal
-    for (
       let r = currentRank + 1, f = currentFile - 1;
-      r <= 8 && f >= 0;
+      r <= 7 && f >= 0;
       r++, f--
     ) {
-      const pos = new Square(r, String.fromCharCode(f + "a".charCodeAt(0)), this.board);
+      if (
+        currentFile < 7 &&
+        currentFile >= 0 &&
+        currentRank <= 7 &&
+        currentRank >= 0
+      ) {
+      const pos = new Square(r, f, this.board);
       const piece = this.board.getPieceFromSquare(pos);
-
       if (piece) {
-        if (piece.getColor() !== this.color) {
+        if (piece.color !== this.color) {
           possibleMoves.push(pos);
         }
         break;
@@ -95,13 +89,45 @@ export class Queen extends Piece {
 
       possibleMoves.push(pos);
     }
+  }
+    // Explore upper-left diagonal
+    for (
+      let r = currentRank - 1, f = currentFile - 1;
+      r >= 0 && f >= 0;
+      r--, f--
+    ) {
+      if (
+        currentFile < 7 &&
+        currentFile >= 0 &&
+        currentRank <= 7 &&
+        currentRank >= 0
+      ) {
+      const pos = new Square(r, f, this.board);
+      const piece = this.board.getPieceFromSquare(pos);
+
+      if (piece) {
+        if (piece.color !== this.color) {
+          possibleMoves.push(pos);
+        }
+        break;
+      }
+
+      possibleMoves.push(pos);
+    }
+  }
     // Explore moves down
-    for (let r = currentRank + 1; r <= 8; r--) {
-      const pos = new Square(r, String.fromCharCode(currentFile), this.board);
+    for (let r = currentRank + 1; r >= 8; r--) {
+      if (
+        currentFile < 7 &&
+        currentFile >= 0 &&
+        currentRank <= 7 &&
+        currentRank >= 0
+      ) {
+      const pos = new Square(r, currentFile, this.board);
       const piece = this.board.getPieceFromSquare(pos);
 
       if (piece) {
-        if (piece.getColor() !== this.color) {
+        if (piece.color !== this.color) {
           possibleMoves.push(pos);
         }
         break;
@@ -109,13 +135,18 @@ export class Queen extends Piece {
 
       possibleMoves.push(pos);
     }
+  }
     // Explore moves up
-    for (let r = currentRank + 1; r <= 8; r++) {
-      const pos = new Square(r, String.fromCharCode(currentFile), this.board);
+    for (let r = currentRank + 1; r <= 7; r++) {
+      const pos = new Square(r, currentFile, this.board);
       const piece = this.board.getPieceFromSquare(pos);
 
       if (piece) {
-        if (piece.getColor() !== this.color) {
+        if (
+          currentRank <= 7 &&
+          currentRank >= 0
+        ) {
+        if (piece.color !== this.color) {
           possibleMoves.push(pos);
         }
         break;
@@ -123,14 +154,17 @@ export class Queen extends Piece {
 
       possibleMoves.push(pos);
     }
-
+  }
     //Explore moves toward a file
-    for (let f = currentFile + 1; f <= 8; f--) {
-      const pos = new Square(currentRank, String.fromCharCode(currentFile), this.board);
+    for (let f = currentFile + 1; f >= 8; f--) {
+      if (
+        currentFile < 7 &&
+        currentFile >= 0){
+      const pos = new Square(currentRank, currentFile, this.board);
       const piece = this.board.getPieceFromSquare(pos);
 
       if (piece) {
-        if (piece.getColor() !== this.color) {
+        if (piece.color !== this.color) {
           possibleMoves.push(pos);
         }
         break;
@@ -138,14 +172,19 @@ export class Queen extends Piece {
 
       possibleMoves.push(pos);
     }
+  }
 
     //Explore moves towards h file
     for (let f = currentFile + 1; f <= 8; f++) {
-      const pos = new Square(currentRank, String.fromCharCode(currentFile), this.board);
+      if (
+        currentFile < 7 &&
+        currentFile >= 0 
+      ) {
+      const pos = new Square(currentRank, currentFile, this.board);
       const piece = this.board.getPieceFromSquare(pos);
 
       if (piece) {
-        if (piece.getColor() !== this.color) {
+        if (piece.color !== this.color) {
           possibleMoves.push(pos);
         }
         break;
@@ -153,7 +192,9 @@ export class Queen extends Piece {
 
       possibleMoves.push(pos);
     }
+  }
 
     return possibleMoves;
   }
 }
+

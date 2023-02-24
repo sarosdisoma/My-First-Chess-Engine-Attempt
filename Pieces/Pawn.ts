@@ -1,11 +1,11 @@
-import { ChessBoard } from '../ChessBoard';
-import { Piece } from './Piece';
+import { ChessBoard } from "../ChessBoard";
+import { Piece } from "./Piece";
 import { Square } from "../Square";
 
 export class Pawn extends Piece {
   constructor(color: "white" | "black", square: Square, board: ChessBoard) {
     super(color, square);
-    this.board = board
+    this.board = board;
   }
 
   public getType(): string {
@@ -15,82 +15,118 @@ export class Pawn extends Piece {
   getPossibleMoves(): Square[] {
     const possibleMoves: Square[] = [];
 
-      // Determine the direction the pawn moves based on its color
-      const moveDirection = (this.color === "white") ? 1 : - 1;
-  
-      // Check if the pawn can move one or two spaces forward
-      if (this.board.isEmpty(this.square.rank + moveDirection, this.square.file)) {
-        possibleMoves.push(this.board.coordinateToSquare(this.square.rank + moveDirection, this.square.file.charCodeAt(0) - "a".charCodeAt(0)));
-  
-        // Check if the pawn can move two spaces forward from its starting square
-        if (this.isStartingPosition() && this.board.isEmpty(this.square.rank + 2 * moveDirection, this.square.file)) {
-          possibleMoves.push(this.board.coordinateToSquare(this.square.rank + 2 * moveDirection, this.square.file.charCodeAt(0) - "a".charCodeAt(0)));
-          console.log(possibleMoves)
-        }
-      }
-  
-      // Check if the pawn can capture a piece diagonally to its left
-      // square of pawn to its left =>
-      let squareToItsMoveDirection: Square = this.square;
-      squareToItsMoveDirection.rank += squareToItsMoveDirection.rank +moveDirection 
-      let abc = "abcdefgh"
-      squareToItsMoveDirection.file = abc[abc.indexOf(squareToItsMoveDirection.file) - 1] 
+    // Determine the direction the pawn moves based on its color
+    const moveDirection = this.color === "white" ? -1 : 1;
 
+    // Check if the pawn can move one or two spaces forward
+    if (
+      this.board.isEmpty(this.square.rank + moveDirection, this.square.file)
+    ) {
+      possibleMoves.push(
+        new Square (
+          this.square.rank + moveDirection,
+          this.square.file, this.board)
+        )
+      
+      // Check if the pawn can move two spaces forward from its starting square
+      if (
+        !this.hasMoved &&
+        this.board.isEmpty(
+          this.square.rank + 2 * moveDirection,
+          this.square.file
+        )
+      ) {
 
-
-      if (this.board.colorOfPieceOnSquare(squareToItsMoveDirection) !== this.color) {
-        possibleMoves.push(this.board.coordinateToSquare(this.square.rank + moveDirection, this.square.file.charCodeAt(0) - 97 - 1));
+        possibleMoves.push(
+          new Square(
+            this.square.rank + 2 * moveDirection,
+            this.square.file, this.board
+          )
+        );
       }
-  
-      // Check if the pawn can capture a piece diagonally to its right
-      squareToItsMoveDirection.file = abc[abc.indexOf("a") + 1 ]  
-      if (this.board.colorOfPieceOnSquare(squareToItsMoveDirection) !== this.color) {
-        possibleMoves.push(this.board.coordinateToSquare(this.square.rank + moveDirection, this.square.file.charCodeAt(0) - 97 - 1));
-      }
-  
-      // Check for en passant moves
-      if (this.board.lastMovedPawn && this.board.didLastMovedPawnMoveTwoSteps) {
-        const lastMovedPawn = this.board.lastMovedPawn;
-        const lastMovedPawnColor = lastMovedPawn.color;
-        const lastMovedPawnRank = this.board.lastMovedPawn.square.rank
-        let fileOFLastMovedPawn: string = this.board.lastMovedPawn.square.file
-        fileOFLastMovedPawn = abc[abc.indexOf(fileOFLastMovedPawn) - 1]
-        if(lastMovedPawn.color === "white"){
-          var startingPositionOfLastMovedPawn = 2
-        } else if (lastMovedPawn.color === "black"){
-          var startingPositionOfLastMovedPawn = 7
-        } else {
-          var startingPositionOfLastMovedPawn = 1000
-        }
-        if(this.square.file !== "a"){
-          if (this.square.rank === lastMovedPawnRank && this.square.file === fileOFLastMovedPawn) {
-            if (lastMovedPawn.square.rank === startingPositionOfLastMovedPawn + 2 && this.color !== lastMovedPawnColor) {
-              possibleMoves.push(this.board.coordinateToSquare(this.square.rank + moveDirection, this.square.file.charCodeAt(0) - 97 - 1));
-            }
-          }
-        }
-        
-        // Check if the pawn can capture en passant to the right
-        fileOFLastMovedPawn = abc[abc.indexOf(fileOFLastMovedPawn) + 2]
-        if(this.square.file !== "h"){
-          if (this.square.rank === lastMovedPawnRank && this.square.file === fileOFLastMovedPawn) {
-            if (lastMovedPawn.square.rank === startingPositionOfLastMovedPawn && this.color !== lastMovedPawnColor) {
-              possibleMoves.push(this.board.coordinateToSquare(this.square.rank + moveDirection, this.square.file.charCodeAt(0) - 97 - 1));
-            }
-          }
-        }
-        
-      }
-      return possibleMoves;
     }
 
-    isStartingPosition(): boolean{
-      if(this.square.rank === 2 && this.color === "white"){
-        return true;
-      } else if (this.square.rank === 7 && this.color === "black"){
-        return true
-      }
-      return false
+    // Check if the pawn can capture a piece diagonally to its left
+    // square of pawn to its left =>
+    let squareToItsMoveDirectionDiagonally: Square = new Square(
+      this.square.rank + moveDirection,
+      this.square.file - 1,
+      this.board
+    );
+    squareToItsMoveDirectionDiagonally.rank =
+      squareToItsMoveDirectionDiagonally.rank + moveDirection;
+    squareToItsMoveDirectionDiagonally.file =
+      squareToItsMoveDirectionDiagonally.file - 1;
+
+    /*const piece = this.board.getPieceFromSquare(squareToItsMoveDirectionDiagonally);
+if (piece !== null && piece.color !== this.color) {
+*/
+
+    const piece = this.board.getPieceFromSquare(
+      squareToItsMoveDirectionDiagonally
+    );
+    if (piece && piece.color !== this.color) {
+      possibleMoves.push(squareToItsMoveDirectionDiagonally);
     }
+
+    // Check if the pawn can capture a piece diagonally to its right
+    squareToItsMoveDirectionDiagonally.file = +2;
+    if (
+      this.board.colorOfPieceOnSquare(squareToItsMoveDirectionDiagonally) !==
+      this.color
+    ) {
+      possibleMoves.push(squareToItsMoveDirectionDiagonally);
+    }
+
+    // Check for en passant moves
+    if (this.board.lastMovedPawn && this.board.didLastMovedPawnMoveTwoSteps) {
+      const lastMovedPawn = this.board.lastMovedPawn;
+      const lastMovedPawnColor = lastMovedPawn.color;
+      const lastMovedPawnRank = this.board.lastMovedPawn.square.rank;
+      let fileOFLastMovedPawn: number = this.board.lastMovedPawn.square.file;
+
+      if (lastMovedPawn.color === "white") {
+        var startingPositionOfLastMovedPawn = 2;
+      } else if (lastMovedPawn.color === "black") {
+        var startingPositionOfLastMovedPawn = 7;
+      } else {
+        var startingPositionOfLastMovedPawn = 1000;
+      }
+
+      if (this.square.file !== 0) {
+        if (
+          this.square.rank === lastMovedPawnRank &&
+          this.square.file === fileOFLastMovedPawn
+        ) {
+          if (this.color !== lastMovedPawnColor) {
+            possibleMoves.push(
+              this.board.coordinateToSquare(
+                this.square.rank + moveDirection,
+                this.square.file
+              )
+            );
+          }
+        }
+      }
+
+      // Check if the pawn can capture en passant to the right
+      fileOFLastMovedPawn = fileOFLastMovedPawn + 2;
+      if (this.square.file !== 7) {
+        if (
+          this.square.rank === lastMovedPawnRank &&
+          this.square.file === fileOFLastMovedPawn
+        ) {
+          if (this.color !== lastMovedPawnColor) {
+            possibleMoves.push(
+              this.board.coordinateToSquare(
+                this.square.rank + moveDirection,
+                this.square.file
+              )
+            );
+          }
+        }
+      }
+    }
+    return possibleMoves;
+  }
 }
-

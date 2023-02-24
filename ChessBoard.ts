@@ -10,83 +10,60 @@ import { Rook } from "./Pieces/Rook";
 export class ChessBoard {
   public currentPosition: (Piece | null)[][] = [];
   public lastMovedPawn: Pawn | null;
-  public didLastMovedPawnMoveTwoSteps: boolean = false
+  public didLastMovedPawnMoveTwoSteps: boolean = false;
+  public lastMove: any = {
+    piece: Piece,
+    initialValueOfToSquare: Piece || null,
+    from: Square,
+    to: Square,
+  };
 
   constructor() {
     this.lastMovedPawn = null;
 
     let abc = "abcdefgh";
     let row: (Piece | null)[] = [];
-    row.push((new Rook("white", new Square(1, "a", this), this)));
-    row.push(new Knight("white", new Square(1, "b", this), this));
-    row.push(new Bishop("white", new Square(1, "c", this), this));
-    row.push(new Queen("white", new Square(1, "d", this), this));
-    row.push(new King("white", new Square(1, "e", this), this));
-    row.push(new Bishop("white", new Square(1, "f", this), this));
-    row.push(new Knight("white", new Square(1, "g", this), this));
-    row.push(new Rook("white", new Square(1, "h", this), this));
-    this.currentPosition.push(row)
-    row = []
+    row.push(new Rook("black", new Square(0, 0, this), this));
+    row.push(new Knight("black", new Square(0, 1, this), this));
+    row.push(new Bishop("black", new Square(0, 2, this), this));
+    row.push(new Queen("black", new Square(0, 3, this), this));
+    row.push(new King("black", new Square(0, 4, this), this));
+    row.push(new Bishop("black", new Square(0, 5, this), this));
+    row.push(new Knight("black", new Square(0, 6, this), this));
+    row.push(new Rook("black", new Square(0, 7, this), this));
+    this.currentPosition.push(row);
+    row = [];
     for (let i = 0; i < 8; i++) {
-      row.push(new Pawn("white", new Square(2, abc[i], this), this));
+      row.push(new Pawn("black", new Square(1, i, this), this));
     }
-    this.currentPosition.push(row)
-    row = []
-    for(let j = 0; j < 4; j++){
+    this.currentPosition.push(row);
+    row = [];
+    for (let j = 0; j < 4; j++) {
       for (let i = 0; i < 8; i++) {
-        row.push(null)
-      } 
-      this.currentPosition.push(row)
-      row = []
+        row.push(null);
+      }
+      this.currentPosition.push(row);
+      row = [];
     }
-    
-    for (let i = 0; i < 8; i++) {
-      row.push(new Pawn("black", new Square(2, abc[i], this), this));
-    }
-    this.currentPosition.push(row)
-    // Black currentPosition
-    row.push(new Rook("black", new Square(8, "a", this), this));
-    row.push(new Knight("black", new Square(8, "b", this), this));
-    row.push(new Bishop("black", new Square(8, "c", this), this));
-    row.push(new Queen("black", new Square(8, "d", this), this));
-    row.push(new King("black", new Square(8, "e", this), this));
-    row.push(new Bishop("black", new Square(8, "f", this), this));
-    row.push(new Knight("black", new Square(8, "g", this), this));
-    row.push(new Rook("black", new Square(8, "h", this), this));
-    this.currentPosition.push(row)
-  }
 
-  
-  captures(pieceThatCaptures: Piece, pieceBeingCaptured: Piece) {
-    if(pieceBeingCaptured instanceof King){
-      return "you cant capture the king, yo"
+    for (let i = 0; i < 8; i++) {
+      row.push(new Pawn("white", new Square(6, i, this), this));
     }
-    const pos = pieceBeingCaptured.getPosition();
-    const pos2 = pieceThatCaptures.getPosition();
-    this.removePiece(pos2)
-    this.setPiece(pos, pieceThatCaptures)
+    this.currentPosition.push(row);
+    // Black currentPosition
+    row.push(new Rook("white", new Square(6, 0, this), this));
+    row.push(new Knight("white", new Square(6, 1, this), this));
+    row.push(new Bishop("white", new Square(6, 2, this), this));
+    row.push(new Queen("white", new Square(6, 3, this), this));
+    row.push(new King("white", new Square(6, 4, this), this));
+    row.push(new Bishop("white", new Square(6, 5, this), this));
+    row.push(new Knight("white", new Square(6, 6, this), this));
+    row.push(new Rook("white", new Square(6, 7, this), this));
+    this.currentPosition.push(row);
   }
 
   getPieceFromSquare(square: Square): Piece | null {
-    return this.currentPosition[square.rank][square.file.charCodeAt(0) - "a".charCodeAt(0)];
-  }
-
-  movePiece(from: Square, to: Square): boolean {
-    const piece = this.getPieceFromSquare(from);
-    
-
-    if (!piece) {
-      console.log(
-        "HOW DID YOU DO IT YOU NUMBNUT??? IF I EVER RUN INTO THIS STATEMENT, IM JUST BAD, BUT GONNA LEAVE IT HERE, MIGHT COME IN HANDY"
-      );
-      return false;
-    }
-    const success = piece.moveTo(to, from);
-    return success;
-  }
-
-  getLastMovedPawn(): Pawn | null {
-    return this.lastMovedPawn;
+    return this.currentPosition[square.rank][square.file];
   }
 
   wasPushedDoubleStep(pawn: Pawn): boolean {
@@ -104,42 +81,52 @@ export class ChessBoard {
     if (!this.getPieceFromSquare(Square)) {
       return null;
     }
-    this.currentPosition[Square.rank][Square.file.charCodeAt(0) - "a".charCodeAt(0)] = null; 
+    this.currentPosition[Square.rank][Square.file] = null;
     return piece;
   }
+
+  undoMove() {
+    this.currentPosition[this.lastMove["from"].rank][
+      this.lastMove["from"].file
+    ] = this.lastMove["piece"];
+    if (this.lastMove["initialValueOfSquare"] instanceof Piece) {
+      this.currentPosition[this.lastMove["to"].rank][this.lastMove["to"].file] =
+        this.lastMove["initialValueOfSquare"];
+    } else {
+      this.currentPosition[this.lastMove["to"].rank][this.lastMove["to"].file] =
+        null;
+    }
+  }
+
   makeMove(from: Square, to: Square) {
     const piece = this.getPieceFromSquare(from);
-    const capturedPiece = this.getPieceFromSquare(to);
-
-    let legalMoves = piece?.getPossibleMoves()
-    if(!(legalMoves?.includes(to))){
-      return "das not legal m8";
-    }
+    const opponentPiece = this.getPieceFromSquare(to);
+    this.currentPosition[piece!.square.rank][piece!.square.file] = null;
+    this.currentPosition[to.rank][to.file] = piece;
+    this.lastMove["piece"] = piece;
+    this.lastMove["fromSquare"] = from;
+    this.lastMove["toSquare"] = to;
+    this.lastMove["initialValueOfToSquare"] = opponentPiece;
 
     if (piece instanceof Pawn) {
+      piece.hasMoved = true;
       this.lastMovedPawn = piece;
-      if(Math.abs(from.rank - to.rank)){
+      if (Math.abs(from.rank - to.rank) === 2) {
         this.didLastMovedPawnMoveTwoSteps = true;
       }
     } else {
       this.lastMovedPawn = null;
       this.didLastMovedPawnMoveTwoSteps = false;
     }
-
-    // Update the piece's currentPosition on the board
-    this.removePiece(from);
-    this.setPiece(to, piece);    
   }
 
   setPiece(currentPosition: Square, piece: Piece | null): void {
-    this.currentPosition[currentPosition.rank][
-      currentPosition.file.charCodeAt(0) - "a".charCodeAt(0)
-    ] = piece;
+    this.currentPosition[currentPosition.rank][currentPosition.file] = piece;
   }
 
-  isEmpty(rank: number, file: string): boolean{
+  isEmpty(rank: number, file: number): boolean {
     let isEmpty: boolean;
-    if(this.currentPosition[rank][file.charCodeAt(0) - "a".charCodeAt(0)]){
+    if (this.currentPosition[rank][file]) {
       isEmpty = false;
     } else {
       isEmpty = true;
@@ -148,17 +135,115 @@ export class ChessBoard {
   }
 
   coordinateToSquare(x: number, y: number): Square {
-    const letter = String.fromCharCode(97 + x);
+    const letter = x;
     const number = 8 - y;
-    let coordinateToSquare = new Square (number, letter,  this)
+    let coordinateToSquare = new Square(number, letter, this);
     return coordinateToSquare;
   }
 
   //if (this.board.isEnemyPiece(this.square.rank + moveDirection, this.square.file.charCodeAt(0) - 1, this.color)) {
-    colorOfPieceOnSquare(square: Square): "white" | "black" | undefined {
-      return this.getPieceFromSquare(square)?.color;
-    }
-}
+  colorOfPieceOnSquare(square: Square): "white" | "black" | undefined {
+    return this.getPieceFromSquare(square)?.color;
+  }
 
+  isSquareAttacked(square: Square, perspective: "white" | "black"): boolean {
+    for (let i = 0; i < this.currentPosition.length; i++) {
+      for (let j = 0; j < this.currentPosition[i].length; j++) {
+        if (
+          this.currentPosition[i][j] instanceof Piece &&
+          this.currentPosition[i][j]
+        ) {
+          let attackedSquares = this.currentPosition[i][j]!.getPossibleMoves();
+          for (let k = 0; k < attackedSquares?.length; k++) {
+            if (
+              attackedSquares[k].file === square.file &&
+              attackedSquares[k].rank === square.rank
+            ) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  getPossibleMoves(maximizingPlayer: "white" | "black"): Square[] {
+    const possibleMoves: Square[] = [];
+    for (let i = 0; i < this.currentPosition.length; i++) {
+      for (let j = 0; j < this.currentPosition[i].length; j++) {
+        if (
+          this.currentPosition[i][j] instanceof Piece &&
+          this.currentPosition[i][j]?.color === maximizingPlayer
+        ) {
+          let movesOfCurrentPiece =
+          this.currentPosition[i][j]!.getPossibleMoves();
+          for (let k = 0; k < movesOfCurrentPiece.length; k++) {
+            if (
+              !this.isKingInCheckInHypotethicalPos(
+                new Square(i, j, this),
+                movesOfCurrentPiece[k]
+              )
+            ) {
+              possibleMoves.push(movesOfCurrentPiece[k]);
+            }
+          }
+        }
+      }  
+    }
+    return possibleMoves;
+  }
+
+  isKingInCheckInHypotethicalPos(from: Square, to: Square): boolean {
+    let king: Piece | null;
+    let hypotethicalPos = this.currentPosition;
+    hypotethicalPos[from.rank][from.file] = null;
+    if (to.rank < 7 && to.rank > 0 && to.file < 7 && to.file > 0) {
+      hypotethicalPos[to.rank][to.file] = this.getPieceFromSquare(from);
+      for (let i = 0; i < hypotethicalPos.length; i++) {
+        for (let j = 0; j < hypotethicalPos[i].length; j++) {
+          if (this.getPieceFromSquare(from) !== null) {
+            if (
+              hypotethicalPos[i][j] instanceof King &&
+              this.getPieceFromSquare(from)!.color ===
+                hypotethicalPos[i][j]!.color
+            ) {
+              king = hypotethicalPos[i][j];
+              break;
+            }
+          }
+        }
+      }
+    } else {
+      return false;
+    }
+
+    for (let i = 0; i < hypotethicalPos.length; i++) {
+      for (let j = 0; j < hypotethicalPos[i].length; j++) {
+          if (this.getPieceFromSquare(from) !== null) {
+          if (
+            hypotethicalPos[i][j]?.color !==
+            this.getPieceFromSquare(from)!.color
+          ) {
+            let possibleMoves = hypotethicalPos[i][j]!.getPossibleMoves();
+            for (let k = 0; k < possibleMoves.length; k++) {
+              if (
+                possibleMoves[i].file === king!.square.file &&
+                possibleMoves[i].rank === king!.square.rank
+              ) {
+                return true;
+              }
+            }
+          }
+        }
+      }
+    }
+    return false;
+  }
+}
 let board: ChessBoard = new ChessBoard();
-console.log(board)
+//board.getPossibleMoves("white");
+//board.makeMove(new Square(1,1, board),new Square(3,1, board))
+console.log(board.getPieceFromSquare(new Square(6,6, board))?.getPossibleMoves())
+//console.log(board.getPieceFromSquare(new Square(1,4, board)))

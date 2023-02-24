@@ -3,11 +3,10 @@ import { Piece } from "./Pieces/Piece";
 
 export class Square {
   public rank: number;
-  public file: string;
+  public file: number;
   private board: ChessBoard;
-  isEnPassantCapture: boolean;
 
-  constructor(rank: number, file: string, board: ChessBoard) {
+  constructor(rank: number, file: number, board: ChessBoard) {
    this.rank = rank
    this.file = file
    this.board = board
@@ -17,3 +16,5 @@ export class Square {
     return (this.board.getPieceFromSquare(this))
   }
 }
+
+
