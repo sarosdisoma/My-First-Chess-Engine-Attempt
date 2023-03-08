@@ -1,8 +1,10 @@
 import { ChessBoard } from '../ChessBoard';
 import { Piece } from './Piece';
-import { Square } from '../Square';
+import { Square } from "../Square";
 
 export class Knight extends Piece {
+  public worth = 2.7;
+
   constructor(color: "white" | "black", square: Square, board: ChessBoard) {
     super(color, square);
     this.board = board
@@ -15,7 +17,6 @@ export class Knight extends Piece {
   getPossibleMoves(): Square[] {
     const possibleMoves: Square[] = [];
     const currentPosition = this.square;
-
     const rankOffsets = [2, 1, -1, -2, -2, -1, 1, 2];
     const fileOffsets = [1, 2, 2, 1, -1, -2, -2, -1];
 
@@ -29,6 +30,7 @@ export class Knight extends Piece {
         }
       }
     }
+    //this.worth = 2.7 + (possibleMoves.length * 0.0069);
     return possibleMoves;
   }
 }

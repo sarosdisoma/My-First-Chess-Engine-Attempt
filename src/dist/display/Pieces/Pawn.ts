@@ -1,8 +1,9 @@
-import { ChessBoard } from "../ChessBoard";
+import { ChessBoard } from '../ChessBoard';
 import { Piece } from "./Piece";
 import { Square } from "../Square";
 
 export class Pawn extends Piece {
+  public worth = 1.1// + ((this.color === "black" ? this.square.rank - 1 : Math.abs(0 - this.square.rank + 1) ) * 0.0069);
   constructor(color: "white" | "black", square: Square, board: ChessBoard) {
     super(color, square);
     this.board = board;

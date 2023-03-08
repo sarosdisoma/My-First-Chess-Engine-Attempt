@@ -1,8 +1,10 @@
-import { ChessBoard } from "../ChessBoard";
+import { ChessBoard } from '../ChessBoard';
 import { Piece } from "./Piece";
 import { Square } from "../Square";
 
 export class Queen extends Piece {
+  public worth = 10
+
   constructor(color: "white" | "black", square: Square, board: ChessBoard) {
     super(color, square);
     this.board = board;
@@ -193,6 +195,7 @@ export class Queen extends Piece {
       possibleMoves.push(pos);
     }
   }
+  //this.worth = 10 + (possibleMoves.length * 0.0069)
 
     return possibleMoves;
   }

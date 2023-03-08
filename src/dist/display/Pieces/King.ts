@@ -1,8 +1,10 @@
-import { ChessBoard } from "../ChessBoard";
+import { ChessBoard } from '../ChessBoard';
 import { Piece } from "./Piece";
 import { Square } from "../Square";
 
 export class King extends Piece {
+  public worth = 0;
+
   constructor(color: "white" | "black", square: Square, board: ChessBoard) {
     super(color, square);
     this.board = board;

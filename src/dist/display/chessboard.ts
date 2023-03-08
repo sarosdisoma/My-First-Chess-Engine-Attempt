@@ -20,8 +20,6 @@ export class ChessBoard {
 
   constructor() {
     this.lastMovedPawn = null;
-
-    let abc = "abcdefgh";
     let row: (Piece | null)[] = [];
     row.push(new Rook("black", new Square(0, 0, this), this));
     row.push(new Knight("black", new Square(0, 1, this), this));
@@ -50,6 +48,7 @@ export class ChessBoard {
       row.push(new Pawn("white", new Square(6, i, this), this));
     }
     this.currentPosition.push(row);
+    row = []
     // Black currentPosition
     row.push(new Rook("white", new Square(6, 0, this), this));
     row.push(new Knight("white", new Square(6, 1, this), this));
@@ -96,10 +95,12 @@ export class ChessBoard {
       this.currentPosition[this.lastMove["to"].rank][this.lastMove["to"].file] =
         null;
     }
+     this.lastMove["piece"].square = this.lastMove["from"].square
   }
 
   makeMove(from: Square, to: Square) {
     const piece = this.getPieceFromSquare(from);
+    this.getPieceFromSquare(from)!.square = to
     const opponentPiece = this.getPieceFromSquare(to);
     this.currentPosition[piece!.square.rank][piece!.square.file] = null;
     this.currentPosition[to.rank][to.file] = piece;
@@ -107,6 +108,7 @@ export class ChessBoard {
     this.lastMove["fromSquare"] = from;
     this.lastMove["toSquare"] = to;
     this.lastMove["initialValueOfToSquare"] = opponentPiece;
+    piece!.square = to;
 
     if (piece instanceof Pawn) {
       piece.hasMoved = true;
@@ -118,6 +120,23 @@ export class ChessBoard {
       this.lastMovedPawn = null;
       this.didLastMovedPawnMoveTwoSteps = false;
     }
+    let maximizerMaterialcount: number = 0;
+    let minimizerkMaterialCount: number = 0;
+    for (let i = 0; i < this.currentPosition.length; i++) {
+      for (let j = 0; j < this.currentPosition[i].length; j++) {
+        if (
+          this.currentPosition[i][j] &&
+          this.currentPosition[i][j] instanceof Piece
+        ) {
+          if (this.currentPosition[i][j]!.color === piece!.color) {
+            maximizerMaterialcount += this.currentPosition[i][j]!.worth;
+          } else {
+            minimizerkMaterialCount += this.currentPosition[i][j]!.worth;
+          }
+        }
+      }
+    }
+    return [maximizerMaterialcount,  minimizerkMaterialCount];
   }
 
   setPiece(currentPosition: Square, piece: Piece | null): void {
@@ -141,7 +160,6 @@ export class ChessBoard {
     return coordinateToSquare;
   }
 
-  //if (this.board.isEnemyPiece(this.square.rank + moveDirection, this.square.file.charCodeAt(0) - 1, this.color)) {
   colorOfPieceOnSquare(square: Square): "white" | "black" | undefined {
     return this.getPieceFromSquare(square)?.color;
   }
@@ -178,7 +196,7 @@ export class ChessBoard {
           this.currentPosition[i][j]?.color === maximizingPlayer
         ) {
           let movesOfCurrentPiece =
-          this.currentPosition[i][j]!.getPossibleMoves();
+            this.currentPosition[i][j]!.getPossibleMoves();
           for (let k = 0; k < movesOfCurrentPiece.length; k++) {
             if (
               !this.isKingInCheckInHypotethicalPos(
@@ -190,7 +208,7 @@ export class ChessBoard {
             }
           }
         }
-      }  
+      }
     }
     return possibleMoves;
   }
@@ -221,7 +239,7 @@ export class ChessBoard {
 
     for (let i = 0; i < hypotethicalPos.length; i++) {
       for (let j = 0; j < hypotethicalPos[i].length; j++) {
-          if (this.getPieceFromSquare(from) !== null) {
+        if (this.getPieceFromSquare(from) !== null) {
           if (
             hypotethicalPos[i][j]?.color !==
             this.getPieceFromSquare(from)!.color
@@ -241,9 +259,20 @@ export class ChessBoard {
     }
     return false;
   }
+
+  getMaximalizatorsKing(color: "white" | "black") {
+    for (let i = 0; i < this.currentPosition.length; i++) {
+      for (let j = 0; j < this.currentPosition[i].length; j++) {
+        if (this.currentPosition[i][j]) {
+          if (
+            this.currentPosition[i][j]!.color === color &&
+            this.currentPosition[i][j] instanceof King
+          ) {
+            return this.currentPosition[i][j] as King;
+          }
+        }
+      }
+    }
+  }
 }
-let board: ChessBoard = new ChessBoard();
-//board.getPossibleMoves("white");
-//board.makeMove(new Square(1,1, board),new Square(3,1, board))
-console.log(board.getPieceFromSquare(new Square(6,6, board))?.getPossibleMoves())
-//console.log(board.getPieceFromSquare(new Square(1,4, board)))
+
